@@ -1,0 +1,91 @@
+-- Membuat tabel untuk barang
+CREATE TABLE Barang (
+    KODE VARCHAR(255) PRIMARY KEY,
+    NAMA VARCHAR(255),
+    HARGA_SATUAN DOUBLE
+);
+
+-- Membuat tabel untuk pelanggan
+CREATE TABLE Pelanggan (
+    KODE VARCHAR(255) PRIMARY KEY,
+    NAMA VARCHAR(255),
+    ALAMAT VARCHAR(255)
+);
+
+-- Membuat tabel transaksi
+CREATE TABLE Transaksi (
+    KODE VARCHAR(255) PRIMARY KEY,
+    TANGGAL DATE,
+    KODE_PELANGGAN VARCHAR(255),
+    KODE_BARANG VARCHAR(255),
+    JUMLAH_BARANG INT,
+    CONSTRAINT FK_Pelanggan FOREIGN KEY (KODE_PELANGGAN) REFERENCES Pelanggan(KODE) ON DELETE CASCADE,
+    CONSTRAINT FK_Barang FOREIGN KEY (KODE_BARANG) REFERENCES Barang(KODE) ON DELETE CASCADE
+);
+
+-- Menginput data untuk tabel barang
+INSERT INTO Barang VALUES 
+('B1', 'Baju', 12000),
+('B2', 'Celana', 10000),
+('B3', 'Sepatu', 30000);
+
+-- Menginput data untuk tabel pelanggan
+INSERT INTO Pelanggan VALUES 
+('P1', 'Yogi', 'JAKARTA'),
+('P2', 'Anggi', 'BANDUNG'),
+('P3', 'Rahma', 'BANDUNG');
+
+-- Menginput data untuk tabel transaksi
+INSERT INTO Transaksi VALUES 
+('TRX001', '2019-10-01', 'P1', 'B1', 3),
+('TRX002', '2019-10-02', 'P2', 'B2', 2),
+('TRX003', '2019-10-08', 'P2', 'B1', 5),
+('TRX004', '2019-10-10', 'P1', 'B1', 1),
+('TRX005', '2019-10-17', 'P3', 'B2', 2),
+('TRX006', '2019-10-17', 'P2', 'B3', 1),
+('TRX007', '2019-10-18', 'P3', 'B1', 4),
+('TRX008', '2019-10-18', 'P2', 'B2', 2);
+
+-- JAWABAN A
+SELECT * FROM Barang WHERE HARGA_SATUAN > 10000 ORDER BY HARGA_SATUAN ASC;
+
+-- JAWABAN B
+SELECT * FROM Pelanggan WHERE NAMA LIKE '%g%' AND ALAMAT = 'BANDUNG';
+
+-- JAWABAN C
+SELECT 
+t.kode, 
+t.tanggal, 
+p.nama as nama_pelanggan, 
+b.nama as nama_barang, 
+t.jumlah_barang as jumlah, 
+b.harga_satuan, 
+SUM(b.harga_satuan * t.jumlah_barang) as total
+FROM 
+	Transaksi t 
+INNER JOIN 
+	Pelanggan p ON t.kode_pelanggan = p.kode 
+INNER JOIN 
+	Barang b ON t.kode_barang = b.kode 
+GROUP BY 
+	t.kode, t.tanggal, nama_pelanggan, nama_barang, t.jumlah_barang, b.harga_satuan 
+ORDER BY 
+	nama_pelanggan 
+	ASC; 
+	
+-- JAWABAN D	
+SELECT 
+    p.nama AS nama_pelanggan,
+    SUM(t.jumlah_barang) AS jumlah,
+    SUM(t.jumlah_barang * b.harga_satuan) AS total_harga
+FROM 
+    Transaksi t
+INNER JOIN 
+    Pelanggan p ON t.kode_pelanggan = p.kode
+INNER JOIN 
+    Barang b ON t.kode_barang = b.kode
+GROUP BY 
+    p.nama
+ORDER BY
+	total_harga 
+	DESC;
